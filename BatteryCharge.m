@@ -1,5 +1,7 @@
-function [battery,energy] = BatteryCharge(battery,energy,maxCharge,maxCharge15min)
-
+function [battery,energy] = BatteryCharge(battery,energy,maxCharge,maxCharge15min,SOC)
+    
+    maxCharge15min= maxCharge15min*(20/SOC);  
+    
     if (battery + energy) <= maxCharge    %l'energia prodotta ci sta nella batteria
                 if energy <= maxCharge15min    %l'energia prodotta non supera la costante di carica
                    battery = battery + energy;

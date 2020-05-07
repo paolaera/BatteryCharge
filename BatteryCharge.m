@@ -1,6 +1,8 @@
-function [battery,energy] = BatteryCharge(battery,energy,maxCharge,maxCharge15min,SOC)
+function [battery,energy] = BatteryCharge(battery,energy,maxCharge)
+      
+    maxCharge15min=(-0.0002*(battery^4)+0.0083*(battery^3)-0.12*(battery^2)+0.74*(battery)+2.9765)/4;
+    %funzione che carica la batteria in circa 8 ore da 20% al 100%
     
-    maxCharge15min= maxCharge15min*(20/SOC);  
     
     if (battery + energy) <= maxCharge    %l'energia prodotta ci sta nella batteria
                 if energy <= maxCharge15min    %l'energia prodotta non supera la costante di carica

@@ -1,8 +1,8 @@
 clear
 clc
 load Load15min.txt
-load PV15min.txt
-energy = (PV15min - Load15min)'/4;
+load PV50kWPula15min.txt
+energy = (PV50kWPula15min - Load15min)'/4;
 energy2 = energy;
 maxCharge = [24;24;24;24];
 minCharge = maxCharge/5;
@@ -78,7 +78,7 @@ energySales = energySales15min*4;
    
     subplot(2,2,[3,4]);
     x=9000:10000;
-    plot(x,Load15min(9000:10000,1),'b',x,PV15min(9000:10000,1),'g',x,battery(:,9000:10000));
+    plot(x,Load15min(9000:10000,1),'b',x,PV50kWPula15min(9000:10000,1),'g',x,battery(:,9000:10000));
     title('Load, PV and batteries')
     
    
@@ -112,7 +112,7 @@ energySales = energySales15min*4;
     end
     for i = 9000:10000
         fprintf(fp4,'\n');
-        fprintf(fp4,'%f\t%f\t%f\t%f\t',Load15min(i),PV15min(i),energyDemand(1,i),energySales(1,i));
+        fprintf(fp4,'%f\t%f\t%f\t%f\t',Load15min(i),PV50kWPula15min(i),energyDemand(1,i),energySales(1,i));
         for j = 1:length(I)
             fprintf(fp4,'%f\t',SOC(j,i));
         end

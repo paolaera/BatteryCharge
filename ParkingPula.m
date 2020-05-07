@@ -8,32 +8,23 @@ CarOut = CarIO15min(:,2)';
 Load15min = ones(size(PV50kWPula15min));
 energy = (PV50kWPula15min - Load15min)'/4;
 maxCharge = [24;24;24;24;24;24;24;24;24;24];
-minCharge = maxCharge/5;
-battery = minCharge(1,1)*ones(size(minCharge,1),size(PV50kWPula15min,1)); %lo abbiamo inizializzato così per far partire tutte le batterie al minimo
+minCharge = maxCharge(1,1)/5;
+battery = -1*ones(size(maxCharge,1),size(PV50kWPula15min,1)); %lo abbiamo inizializzato tutte le batterie assenti
+SOC = SOCcontrol(battery,maxCharge);
 energyDemand15min = (zeros(size(Load15min))');
 energySales15min = (zeros(size(Load15min))');
-SOC = SOCcontrol(battery,maxCharge);
 [B,I] = sortrows(SOC,1,'ascend'); %batteria meno carica prima riga, batteria più carica ultima riga
 I = I';
 VarCharge = I(1);
 j=1;
-VehiclesIn = zeros(size(PV50kWPula15min'));
+VehiclesIn = zeros(size(PV50kWPula15min')); 
 
 for i = 1:1000
-    VehiclesIn(i)= VehiclesIn(i)+CarIn(i)-CarOut(i);
-    if VehiclesIn(i)~=10 %quando non è pieno il parcheggio
-       battery(VehiclesIn(i)+1:size(battery,1),i)= -1;
+    if CarIn(i) ~= 0
+        [VehiclesIn(i),battery(:,i)] = In(VehiclesIn(i),battery(:,i),CarIn(i),minCharge);
     end
-    VehiclesIn(i+1)= VehiclesIn(i);
-end
-
-for i = 1:1000
-    [VehiclesIn(i),O] = Out(VehiclesIn(i),CarOut(i),battery(:,i));
-    for k = 1:length(O)
-        battery(O(k),i) = -1;
-    end
-    if VehiclesIn(i)~=0
-       battery(1:VehiclesIn(i),i+1)=battery(1:VehiclesIn(i),i);
+    if CarOut(i) ~= 0
+       [VehiclesIn(i),battery(:,i)] = Out(VehiclesIn(i),CarOut(i),battery(:,i));
     end
     if energy(i) < 0 %l'energia del fotovoltaico non è abbastanza
         SOC(:,i+1)=SOC(:,i);
@@ -62,7 +53,6 @@ for i = 1:1000
     j=1;
 end
 
-
 energyDemand = energyDemand15min*4; %così abbiamo in kWh la vendità e la richiesta di energia
 energySales = energySales15min*4;
 
@@ -86,4 +76,3 @@ title('Load, PV and batteries')
 
 filename = strcat('Plot1000',MC,'kWh',NB,'vehiclesPula');
 saveas(h,filename + '.jpg');
-    

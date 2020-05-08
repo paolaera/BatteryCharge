@@ -37,7 +37,7 @@ for i = 1:1000
             NumBattery = I(1);
           end
         end
-        while energy(i) > 0 && SOC(NumBattery,i)~=100 && j <= length(I)
+        while energy(i) > 0 && SOC(NumBattery,i)~=100 && j <= length(I) && battery(NumBattery,i)~=-1
             [battery(NumBattery,i),energy(i)] = BatteryCharge(battery(NumBattery,i),energy(i),maxCharge(NumBattery));%applico la funzione scarica
             SOC(NumBattery,i) = SOCcontrol(battery(NumBattery,i),maxCharge(NumBattery));
             if j == size(I,1)    % usiamo questo per evitare che finisco su I(size(battery)+1)

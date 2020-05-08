@@ -1,13 +1,12 @@
 function [VehiclesIn,battery] = In(VehiclesIn,battery,CarIn,minCharge)
 
-VehiclesIn = VehiclesIn + CarIn;
-for i = 1:size(battery)
-    if CarIn ~= 0
-        if battery(i,1) == -1
-            battery(i,1) = minCharge;
-            CarIn = CarIn - 1;
-        end
+while CarIn ~= 0
+    VehiclesIn = VehiclesIn + 1;
+    if battery(VehiclesIn,1) == -1
+        battery(VehiclesIn,1) = minCharge;
+        CarIn = CarIn - 1;
     end
 end
+
     
     

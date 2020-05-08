@@ -21,21 +21,26 @@ VehiclesIn = zeros(size(PV50kWPula15min'));
 
 for i = 1:1000
     if CarIn(i) ~= 0
-        [VehiclesIn(i),battery(:,i)] = In(VehiclesIn(i),battery(:,i),CarIn(i),minCharge);
+        [VehiclesIn(i),battery(:,i)] = In(VehiclesIn(i),battery(:,i),CarIn(i),minCharge);          
     end
     if CarOut(i) ~= 0
        [VehiclesIn(i),battery(:,i)] = Out(VehiclesIn(i),CarOut(i),battery(:,i));
     end
     if energy(i) < 0 %l'energia del fotovoltaico non è abbastanza
-        SOC(:,i+1)=SOC(:,i);
         energyDemand15min(i)= -energy(i);
     else
-        SOC(:,i+1)=SOC(:,i);
         NumBattery = VarCharge;
+        [B,I] = sortrows(SOC,i+1,'ascend');
+        while battery(NumBattery,i)==-1 && isempty(I)==0
+          I(1)=[];
+          if isempty(I)==0
+            NumBattery = I(1);
+          end
+        end
         while energy(i) > 0 && SOC(NumBattery,i)~=100 && j <= length(I)
-            [battery(NumBattery,i+1),energy(i)] = BatteryCharge(battery(NumBattery,i),energy(i),maxCharge(NumBattery));%applico la funzione scarica
-            SOC(NumBattery,i+1) = SOCcontrol(battery(NumBattery,i+1),maxCharge(NumBattery));
-            if j == size(maxCharge,1)    % usiamo questo per evitare che finisco su I(size(battery)+1)
+            [battery(NumBattery,i),energy(i)] = BatteryCharge(battery(NumBattery,i),energy(i),maxCharge(NumBattery));%applico la funzione scarica
+            SOC(NumBattery,i) = SOCcontrol(battery(NumBattery,i),maxCharge(NumBattery));
+            if j == size(I,1)    % usiamo questo per evitare che finisco su I(size(battery)+1)
                 NumBattery = I(j); 
             else
                 NumBattery = I(j+1);
@@ -49,7 +54,9 @@ for i = 1:1000
         end
         energySales15min(i)= energy(i);
     end
-    
+    VehiclesIn(i+1)=VehiclesIn(i);
+    SOC(:,i+1)=SOC(:,i);
+    battery(:,i+1)= battery(:,i);  
     j=1;
 end
 

@@ -1,11 +1,11 @@
 function [VehiclesIn,battery]= Out(VehiclesIn,CarOut,battery)
 
-VehiclesIn = VehiclesIn -CarOut;
-if CarOut ~= 0
+
+while CarOut ~= 0
+    VehiclesIn = VehiclesIn -1;
     [B,I] = sortrows(battery,'ascend');
-    for i = 1:CarOut
-        O(i) = I(end);
-        I(end)=[];
-        battery(O(i),1) = -1;
-    end
+    O(1) = I(end);
+    I(end)=[];
+    battery(O(1),1) = -1;
+    CarOut = CarOut -1;
 end

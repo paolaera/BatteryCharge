@@ -28,6 +28,7 @@ for i = 1:1000
     end
     if energy(i) < 0 %l'energia del fotovoltaico non è abbastanza
         energyDemand15min(i)= -energy(i);
+        
     else
         NumBattery = VarCharge;
         [B,I] = sortrows(SOC,i+1,'ascend');

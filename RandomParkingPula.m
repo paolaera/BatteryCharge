@@ -22,6 +22,9 @@ r = normrnd(muIn,sigmaIn,[10,365]); %creiamo estrazioni random di ingressi
 %nei 365 giorni
 yearIn = fix(r/0.25);
 CarIn = zeros(size(PV50kWPula15min));
+CarOut = zeros(size(PV50kWPula15min));
+DataVehicles = [maxCharge';zeros(1,length(maxCharge'))]; % ad ogni colonna corrispondono batteria in uscita, i kms 
+%percorsi e la permanenza in ricarica di ogni veicolo
 for i= 1 : 365
     for j = 1 : size(battery,1)
         CarIn(yearIn(j,i) + (96*(i-1)))= CarIn(yearIn(j,i)+(96*(i-1)))+1;
@@ -30,8 +33,15 @@ end
 
 for i = 1:1000
     if CarIn(i) ~= 0
-        [VehiclesIn(i),battery(:,i)] = InRandom(VehiclesIn(i),battery(:,i),CarIn(i),minCharge,i);
+        [VehiclesIn(i),battery(:,i),DataVehicles] = InRandom(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles);
+        for j = 1 : size(battery,1)
+            if DataVehicles(2,j)~=0
+               CarOut(DataVehicles(2,j))= CarOut(DataVehicles(2,j))+1;
+               DataVehicles(2,j)=0;
+            end
+        end
     end
+    
     if CarOut(i) ~= 0
        [VehiclesIn(i),battery(:,i)] = Out(VehiclesIn(i),CarOut(i),battery(:,i));
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);

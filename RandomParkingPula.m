@@ -45,7 +45,7 @@ for i = 1:1000
        [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles);
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
     end
-    if energy(i) < 0 %l'energia del fotovoltaico non è abbastanza
+    if PV50kWPula15min(i) == 0 & SOC(:,i) ~= SOC(:,1)
             for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
                    if SOC(j,i) < 70 && SOC(j,i) > 21

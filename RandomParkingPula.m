@@ -45,10 +45,10 @@ for i = 1:1000
        [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles);
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
     end
-    if PV50kWPula15min(i) == 0 & SOC(:,i) ~= SOC(:,1)
+    if PV50kWPula15min(i) == 0 
             for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
-                   if SOC(j,i) < 70 && SOC(j,i) > 21
+                   if SOC(j,i) < 70 && SOC(j,i) > 21 && SOC(j,i) ~= SOC(j,1)
                       [battery(j,i),energyDemand15min(i)] = batteryChargeRete(battery(j,i),energyDemand15min(i),energy(i));
                       SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
                    end
@@ -80,6 +80,13 @@ end
 
 energyDemand = energyDemand15min*4; %così abbiamo in kWh la vendità e la richiesta di energia
 energySales = energySales15min*4;
+paretoArray=energyDemand(1:1000)';
+paretoArray = sortrows(paretoArray,'ascend');
+
+
+
+
+    
 
 
 h = figure;
@@ -90,8 +97,8 @@ plot(energyDemand(1:1000),'c');
 title('EnergyDemand')
 
 subplot(2,2,2);
-plot(energySales(1:1000),'y');
-title('EnergySales')
+plot(paretoArray);
+title('Pareto')
 
 subplot(2,2,[3,4]);
 x=1:1000;
@@ -101,3 +108,5 @@ title('Load, PV and batteries')
 
 filename = strcat('Plot1000',MC,'kWh',NB,'vehiclesPula');
 saveas(h,filename + '.jpg');
+saveas(h,filename + '.fig');
+

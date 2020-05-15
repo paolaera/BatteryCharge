@@ -9,7 +9,7 @@ while CarIn ~= 0
     k = k+1;
     if battery(k,1) == -1
        kmsdone=lognrnd(muKMS,sigmaKMS);
-       energyUsed = kmsdone*0.131;
+       energyUsed = kmsdone*0.2;
        parkingTime=normrnd(muTime,sigmaTime);
        time15min = fix(parkingTime/0.25);
        timeOut = timeIn + time15min;

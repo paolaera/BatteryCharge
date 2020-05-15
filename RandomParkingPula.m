@@ -2,8 +2,8 @@ clear
 clc
 load PV50kWPula15min.txt
 PV50kWPula15min = PV50kWPula15min';
-Load15min = ones(size(PV50kWPula15min));
-energy = (PV50kWPula15min - Load15min)/4;
+Load15min = ones(size(PV50kWPula15min))/4;
+energy = (PV50kWPula15min - Load15min);
 maxCharge = [24;24;24;24;24;24;24;24;24;24];
 minCharge = maxCharge(1,1)/5;
 battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min)); %lo abbiamo 

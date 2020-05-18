@@ -97,15 +97,6 @@ Total_Electricity_into_Charge = sum(energyDemand);
 Use_PV = Total_PV - Total_Excess;
 
 
-
-
-
-
-
-
-    
-
-
 h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));

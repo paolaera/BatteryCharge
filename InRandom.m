@@ -1,4 +1,4 @@
-function [VehiclesIn,battery,DataVehicles] = InRandom(VehiclesIn,battery,CarIn,timeIn,DataVehicles)
+function [VehiclesIn,battery,DataVehicles] = InRandom(VehiclesIn,battery,CarIn,timeIn,DataVehicles,maxCharge)
 
 muKMS= 4;
 sigmaKMS= 0.5;
@@ -14,7 +14,7 @@ while CarIn ~= 0
        time15min = fix(parkingTime/0.25);
        timeOut = timeIn + time15min;
        DataVehicles(2,k)= timeOut;
-       battery(k,1) = DataVehicles(1,k)- energyUsed;
+       battery(k,1) = maxCharge(k,1)- energyUsed;
        if battery(k,1) < 0 && battery(k,1) ~= -1
            battery(k,1) = 0;
        end

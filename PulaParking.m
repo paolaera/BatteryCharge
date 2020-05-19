@@ -4,7 +4,7 @@ load PV50kWPula15min.txt
 PV50kWPula15min = PV50kWPula15min';
 Load15min = ones(size(PV50kWPula15min))/4;
 energy = (PV50kWPula15min - Load15min);
-maxCharge = [24;24;24;24;24;24;24;24;24;24];
+maxCharge = [40;40;40;40;40;40;40;40;40;40];
 minCharge = maxCharge(1,1)/5;
 battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min)); %lo abbiamo 
 %inizializzato tutte le batterie assenti
@@ -34,7 +34,7 @@ end
 
 for i = 1:35040
     if CarIn(i) ~= 0
-        [VehiclesIn(i),battery(:,i),DataVehicles] = InRandom(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles);
+        [VehiclesIn(i),battery(:,i),DataVehicles] = InRandom(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles,maxCharge);
         for j = 1 : size(battery,1)
             if DataVehicles(2,j)~=0
                CarOut(DataVehicles(2,j))= CarOut(DataVehicles(2,j))+1;

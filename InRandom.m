@@ -9,7 +9,7 @@ while CarIn ~= 0
     k = k+1;
     if battery(k,1) == -1
        kmsdone=lognrnd(muKMS,sigmaKMS);
-       energyUsed = kmsdone*0.2;
+       energyUsed = kmsdone*0.15; %media consumo cittadino & extraurbano
        parkingTime=normrnd(muTime,sigmaTime);
        time15min = fix(parkingTime/0.25);
        timeOut = timeIn + time15min;

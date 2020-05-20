@@ -1,3 +1,3 @@
 clc
 clear
-converter('PulaIn.txt');
+YearIn = converter('PulaIn.txt');

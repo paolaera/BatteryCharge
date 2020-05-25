@@ -41,7 +41,7 @@ for i = 1:35040
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)
             if battery(j,i) ~= -1
-               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy(i));
+               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy(i),SOC(j,i),maxCharge(j));
                SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
             end
        end
@@ -49,9 +49,9 @@ for i = 1:35040
            for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
                    energy2 = energy(i);
-                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j));
+                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),SOC(j,i));
                    energy2 = energy2 -energy(i); % energia caricata sulla batteria
-                   [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy2);
+                   [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy2,SOC(j,i),maxCharge(j));
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
                 end
            end  
@@ -68,18 +68,30 @@ energySales = energySales15min*4;
 paretoArray = energyDemandPower';
 paretoArray = sortrows(paretoArray,'ascend');
 
+Total_PV = sum(PV50kWPula15min);
+Total_Load = sum(Load15min);
+Total_Excess = sum(energySales15min);
+Total_Electricity_into_Cover_Load = sum(energyDemandLoad);
+Total_Electricity_into_Charge = sum(energyDemandCharge);
+Use_PV = Total_PV - Total_Excess;
+
+
 h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
-subplot(2,2,1);
+subplot(2,3,1);
 plot(energyDemandPower(1:1000),'c');
 title('EnergyDemandPower')
 
-subplot(2,2,2);
+subplot(2,3,2);
 plot(paretoArray);
 title('Pareto')
 
-subplot(2,2,[3,4]);
+subplot(2,3,3);
+plot(energySales(1:1000));
+title('EnergySales')
+
+subplot(2,3,[4,5,6]);
 x=1:1000;
 plot(x,Load15min(1:1000),'b',x,PV50kWPula15min(1:1000),'g',x,battery(:,1:1000));
 title('Load, PV and batteries')

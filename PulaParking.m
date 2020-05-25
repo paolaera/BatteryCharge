@@ -2,7 +2,7 @@ clear
 clc
 load PV50kWPula15min.txt
 yearIn = converter('PulaIn.txt');
-PV50kWPula15min = PV50kWPula15min';
+PV50kWPula15min = PV50kWPula15min'/4;
 Load15min = ones(size(PV50kWPula15min))/4;
 energy = (PV50kWPula15min - Load15min);
 maxCharge = [40;40;40;40;40;40;40;40;40;40;40;40;40;40];
@@ -73,7 +73,25 @@ Total_Load = sum(Load15min);
 Total_Excess = sum(energySales15min);
 Total_Electricity_into_Cover_Load = sum(energyDemandLoad);
 Total_Electricity_into_Charge = sum(energyDemandCharge);
-Use_PV = Total_PV - Total_Excess;
+Used_PV = Total_PV - Total_Excess;
+Total_Electricity_to_charge = Used_PV + Total_Electricity_into_Charge; 
+PVperCent = Used_PV/Total_PV;
+MaxVehicles = max(VehiclesIn);
+served_Car = sum (CarIn);
+
+
+fprintf('Total_PV =%f\n',Total_PV);
+fprintf('Total_Load =%f\n',Total_Load);
+fprintf('Total_Excess =%f\n',Total_Excess);
+fprintf('Total_Electricity_into_Cover_Load =%f\n',Total_Electricity_into_Cover_Load);
+fprintf('Total_Electricity_into_Charge =%f\n',Total_Electricity_into_Charge);
+fprintf('Used_PV =%f\n',Used_PV);
+fprintf('Total_Electricity_to_charge =%f\n',Total_Electricity_to_charge);
+fprintf('PVperCent =%f\n',PVperCent);
+fprintf('MaxVehicles =%d\n',MaxVehicles);
+fprintf('served_Car =%d\n',served_Car);
+
+
 
 
 h = figure;

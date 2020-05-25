@@ -7,8 +7,7 @@ Load15min = ones(size(PV50kWPula15min))/4;
 energy = (PV50kWPula15min - Load15min);
 maxCharge = [40;40;40;40;40;40;40;40;40;40;40;40;40;40];
 minCharge = maxCharge(1,1)/5;
-battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min)); %lo abbiamo 
-%inizializzato tutte le batterie assenti
+battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min));%lo abbiamo inizializzato con tutte le batterie assenti
 SOC = SOCcontrol(battery,maxCharge);
 energyDemandCharge = (zeros(size(Load15min)));% energia richiesta alla rete per caricare le batterie
 energyDemandLoad = (zeros(size(Load15min)));%energia richiesta alla rete per il load
@@ -68,6 +67,7 @@ energySales = energySales15min*4;
 paretoArray = energyDemandPower';
 paretoArray = sortrows(paretoArray,'ascend');
 
+%creazione delle variabili di output
 Total_PV = sum(PV50kWPula15min);
 Total_Load = sum(Load15min);
 Total_Excess = sum(energySales15min);
@@ -79,7 +79,7 @@ PVperCent = Used_PV/Total_PV;
 MaxVehicles = max(VehiclesIn);
 served_Car = sum (CarIn);
 
-
+%stampa a display dei risultati
 fprintf('Total_PV =%f\n',Total_PV);
 fprintf('Total_Load =%f\n',Total_Load);
 fprintf('Total_Excess =%f\n',Total_Excess);
@@ -91,9 +91,7 @@ fprintf('PVperCent =%f\n',PVperCent);
 fprintf('MaxVehicles =%d\n',MaxVehicles);
 fprintf('served_Car =%d\n',served_Car);
 
-
-
-
+%plot di tutti i risultati su due file
 h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
@@ -113,7 +111,6 @@ subplot(2,3,[4,5,6]);
 x=1:1000;
 plot(x,Load15min(1:1000),'b',x,PV50kWPula15min(1:1000),'g',x,battery(:,1:1000));
 title('Load, PV and batteries')
-
 
 filename = strcat('Plot1000',MC,'kWh',NB,'vehiclesPula');
 saveas(h,filename + '.jpg');

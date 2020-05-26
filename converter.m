@@ -5,7 +5,7 @@ mat = fscanf(file,'%f %f',[2,inf]);
 mat = mat';
 max = 0;
 for i = 1:size(mat,1)
-    if mat(i,2) > max && mod(mat(i,2),1) == 0
+    if mat(i,2) > max
         max = mat(i,2);
     end
 end

@@ -1,14 +1,25 @@
 clear
 clc
 load PV50kWPula15min.txt
-yearIn = converter('PulaIn.txt');
-PV50kWPula15min = PV50kWPula15min'/4;
-Load15min = ones(size(PV50kWPula15min))/4;
+InCRS4 = readmatrix('InCRS4.txt');
+InCRS4(isnan(InCRS4))= 0;
+InCRS4(:,end)=[];
+InCRS4(:,1)=[];
+maxIn = max(InCRS4(:,1));
+PV50kWPula15min = PV50kWPula15min'/4*2;%abbiamo moltiplicato per 2 per raddoppiare la produzione
+Load15min = 5*ones(size(PV50kWPula15min))/4; %load a 5 kWh
 energy = (PV50kWPula15min - Load15min);
-maxCharge = [40;40;40;40;40;40;40;40;40;40;40;40;40;40];
-minCharge = maxCharge(1,1)/5;
+A = 24*ones(30,1);
+B = 40*ones(30,1);
+C = 50*ones(17,1); 
+maxCharge = [A;B;C];
+minCharge = maxCharge/5;
 battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min));%lo abbiamo inizializzato con tutte le batterie assenti
-SOC = SOCcontrol(battery,maxCharge);
+SOC = battery;
+for i = 1:size(battery,2)
+    SOC(:,i) = SOCcontrol(battery(:,i),maxCharge);
+end
+
 energyDemandCharge = (zeros(size(Load15min)));% energia richiesta alla rete per caricare le batterie
 energyDemandLoad = (zeros(size(Load15min)));%energia richiesta alla rete per il load
 energySales15min = (zeros(size(Load15min)));
@@ -17,14 +28,14 @@ VehiclesIn = zeros(size(PV50kWPula15min));
 I = I';
 VarCharge = I(1);
 j=1;
-CarIn = yearIn(:,1)';
+CarIn = InCRS4(:,1)';
 CarOut = zeros(size(PV50kWPula15min));
 DataVehicles = [maxCharge';zeros(1,length(maxCharge'))]; % ad ogni colonna corrispondono batteria in uscita, i kms 
 %percorsi e la permanenza in ricarica di ogni veicolo
 
 for i = 1:35040
     if CarIn(i) ~= 0
-        [VehiclesIn(i),battery(:,i),DataVehicles] = InCar(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles,maxCharge,yearIn(i,:));
+        [VehiclesIn(i),battery(:,i),DataVehicles] = InCar(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles,maxCharge,InCRS4(i,:));
         for j = 1 : size(battery,1)
             if DataVehicles(2,j)~=0
                CarOut(DataVehicles(2,j))= CarOut(DataVehicles(2,j))+1;
@@ -40,7 +51,7 @@ for i = 1:35040
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)
             if battery(j,i) ~= -1
-               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy(i),SOC(j,i),maxCharge(j));
+               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),0,SOC(j,i),maxCharge(j));
                SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
             end
        end
@@ -96,7 +107,7 @@ h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
 subplot(2,3,1);
-plot(energyDemandPower(1:1000),'c');
+plot(energyDemandPower(600:1600),'c');
 title('EnergyDemandPower')
 
 subplot(2,3,2);
@@ -104,12 +115,12 @@ plot(paretoArray);
 title('Pareto')
 
 subplot(2,3,3);
-plot(energySales(1:1000));
+plot(energySales(600:1600));
 title('EnergySales')
 
 subplot(2,3,[4,5,6]);
-x=1:1000;
-plot(x,Load15min(1:1000),'b',x,PV50kWPula15min(1:1000),'g',x,battery(:,1:1000));
+x=600:1600;
+plot(x,Load15min(600:1600),'b',x,PV50kWPula15min(600:1600),'g',x,battery(:,600:1600));
 title('Load, PV and batteries')
 
 filename = strcat('Plot1000',MC,'kWh',NB,'vehiclesPula');

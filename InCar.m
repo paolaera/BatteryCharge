@@ -1,15 +1,14 @@
 function [VehiclesIn,battery,DataVehicles] = InCar(VehiclesIn,battery,CarIn,timeIn,DataVehicles,maxCharge,yearIn)
-k = VehiclesIn;
+k = 0;
 while CarIn ~= 0
     k = k+1;
     if battery(k,1) == -1
        parkingTime = yearIn(2*CarIn);
        kmsdone = yearIn(2*CarIn+1);
        energyUsed = kmsdone*0.15; %media consumo cittadino & extraurbano
-       time15min = fix(parkingTime/0.25);
-       timeOut = timeIn + time15min;
+       timeOut = timeIn + parkingTime;
        DataVehicles(2,k)= timeOut;
-       battery(k,1) = maxCharge(k,1)- energyUsed;
+       battery(k,1) = maxCharge(k,1) - energyUsed;
        if battery(k,1) < 0 && battery(k,1) ~= -1
            battery(k,1) = 0;
        end

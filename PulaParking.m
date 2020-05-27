@@ -47,11 +47,12 @@ for i = 1:35040
        [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles);
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
     end
+    percentCharge = previsione(PV50kWPula15min,i,VehiclesIn(i),battery(:,i),maxCharge);
     if energy(i) < 0
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)
             if battery(j,i) ~= -1
-               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),0,SOC(j,i),maxCharge(j));
+               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),0,SOC(j,i),maxCharge(j),percentCharge);
                SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
             end
        end
@@ -61,7 +62,7 @@ for i = 1:35040
                    energy2 = energy(i);
                    [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),SOC(j,i));
                    energy2 = energy2 -energy(i); % energia caricata sulla batteria
-                   [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy2,SOC(j,i),maxCharge(j));
+                   [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy2,SOC(j,i),maxCharge(j),percentCharge);
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
                 end
            end  
@@ -115,7 +116,8 @@ plot(paretoArray);
 title('Pareto')
 
 subplot(2,3,3);
-plot(energySales(600:1600));
+x=600:1600;
+plot(x,energySales(600:1600));
 title('EnergySales')
 
 subplot(2,3,[4,5,6]);

@@ -44,10 +44,10 @@ for i = 1:35040
         end
     end
     if CarOut(i) ~= 0
-       [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles);
+       [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles,SOC(:,i),maxCharge);
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
     end
-    percentCharge = previsione(PV50kWPula15min,i,VehiclesIn(i),battery(:,i),maxCharge);
+    percentCharge = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge);
     if energy(i) < 0
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)
@@ -60,7 +60,7 @@ for i = 1:35040
            for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
                    energy2 = energy(i);
-                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),SOC(j,i));
+                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),SOC(j,i),VehiclesIn(i));
                    energy2 = energy2 -energy(i); % energia caricata sulla batteria
                    [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy2,SOC(j,i),maxCharge(j),percentCharge);
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));

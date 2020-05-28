@@ -1,9 +1,9 @@
-function percentCharge = previsione(PV,i,VehiclesIn,battery,maxCharge)
+function percentCharge = previsione(energy,i,VehiclesIn,battery,maxCharge)
 k = i+31;
 if k > 35040
     k = 35040;
 end
-energy8h = sum(PV(i:k));
+energy8h = sum(energy(i:k));
 energyNeed = 0;
 j = 1;
 while VehiclesIn ~= 0
@@ -18,7 +18,7 @@ end
 if energyNeed <= energy8h
     percentCharge = 0;
 else
-    percentCharge = 10/100; 
+    percentCharge = 8/100; 
 end
 
 

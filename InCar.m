@@ -5,7 +5,7 @@ while CarIn ~= 0
     if battery(k,1) == -1
        parkingTime = yearIn(2*CarIn);
        kmsdone = yearIn(2*CarIn+1);
-       energyUsed = kmsdone*0.15; %media consumo cittadino & extraurbano
+       energyUsed = kmsdone*0.2; %media consumo cittadino & extraurbano
        timeOut = timeIn + parkingTime;
        DataVehicles(2,k)= timeOut;
        battery(k,1) = maxCharge(k,1) - energyUsed;

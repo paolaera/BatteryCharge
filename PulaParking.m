@@ -111,8 +111,8 @@ h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
 subplot(2,3,[2,3]);
-x=14800:15800;
-plot(x,energyDemandPower(14800:15800),x,energySales(14800:15800),x,PVPower(14800:15800));
+x=21400:22400;
+plot(x,energyDemandPower(21400:22400),x,energySales(21400:22400),x,PVPower(21400:22400));
 legend({'energyDemand','energySales','PVPower'},'Location','northwest','Orientation','horizontal');
 title('EnergyDemand,EnergySales and PV')
 
@@ -126,8 +126,8 @@ title('Pareto')
 %title('EnergySales')
 
 subplot(2,3,[4,5,6]);
-x=14800:15800;
-plot(x,Load15min(14800:15800),x,battery(1,14800:15800),x,battery(31,14800:15800),x,battery(61,14800:15800));
+x=21400:22400;
+plot(x,Load15min(21400:22400),x,battery(1,21400:22400),x,battery(31,21400:22400),x,battery(61,21400:22400));
 legend({'Load','24kWh','40kWh','50kWh'},'Location','northwest','Orientation','horizontal');
 title('Load and batteries')
 

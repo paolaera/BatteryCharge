@@ -76,6 +76,8 @@ end
 
 energyDemandPower = (energyDemandCharge + energyDemandLoad)*4; %così abbiamo in kWh la vendita e la potenza richiesta di energia
 energySales = energySales15min*4;
+PVPower = PV50kWPula15min*4;
+
 paretoArray = energyDemandPower';
 paretoArray = sortrows(paretoArray,'ascend');
 
@@ -90,6 +92,7 @@ Total_Electricity_to_charge = Used_PV + Total_Electricity_into_Charge;
 PVperCent = Used_PV/Total_PV;
 MaxVehicles = max(VehiclesIn);
 served_Car = sum (CarIn);
+
 
 %stampa a display dei risultati
 fprintf('Total_PV =%f\n',Total_PV);
@@ -107,23 +110,26 @@ fprintf('served_Car =%d\n',served_Car);
 h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
-subplot(2,3,1);
-plot(energyDemandPower(600:1600),'c');
-title('EnergyDemandPower')
+subplot(2,3,[2,3]);
+x=14800:15800;
+plot(x,energyDemandPower(14800:15800),x,energySales(14800:15800),x,PVPower(14800:15800));
+legend({'energyDemand','energySales','PVPower'},'Location','northwest','Orientation','horizontal');
+title('EnergyDemand,EnergySales and PV')
 
-subplot(2,3,2);
+subplot(2,3,1);
 plot(paretoArray);
 title('Pareto')
 
-subplot(2,3,3);
-x=600:1600;
-plot(x,energySales(600:1600));
-title('EnergySales')
+%subplot(2,3,3);
+%x=600:1600;
+%plot(x,energySales(600:1600));
+%title('EnergySales')
 
 subplot(2,3,[4,5,6]);
-x=600:1600;
-plot(x,Load15min(600:1600),'b',x,PV50kWPula15min(600:1600),'g',x,battery(:,600:1600));
-title('Load, PV and batteries')
+x=14800:15800;
+plot(x,Load15min(14800:15800),x,battery(1,14800:15800),x,battery(31,14800:15800),x,battery(61,14800:15800));
+legend({'Load','24kWh','40kWh','50kWh'},'Location','northwest','Orientation','horizontal');
+title('Load and batteries')
 
 filename = strcat('Plot1000',MC,'kWh',NB,'vehiclesPula');
 saveas(h,filename + '.jpg');

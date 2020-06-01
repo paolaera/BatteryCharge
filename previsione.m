@@ -18,7 +18,7 @@ end
 if energyNeed <= energy8h
     percentCharge = 0;
 else
-    percentCharge = 8/100; 
+    percentCharge = 7.5/100; 
 end
 
 

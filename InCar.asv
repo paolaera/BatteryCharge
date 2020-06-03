@@ -1,5 +1,6 @@
-function [VehiclesIn,battery,DataVehicles,parkingTime] = InCar(VehiclesIn,battery,CarIn,timeIn,DataVehicles,maxCharge,yearIn,parkingTime)
+function [VehiclesIn,battery,DataVehicles] = InCar(VehiclesIn,battery,CarIn,timeIn,DataVehicles,maxCharge,yearIn)
 k = 0;
+parkingTime = zeros(size(maxCharge));
 while CarIn ~= 0
     k = k+1;
     if battery(k,1) == -1

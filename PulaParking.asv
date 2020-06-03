@@ -48,7 +48,7 @@ for i = 1:35040
        [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles,SOC(:,i),maxCharge);
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
     end
-    percentCharge = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge,parkingTime,SOC(:,i));
+    percentCharge = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge,parkingTime);
     if energy(i) < 0
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)

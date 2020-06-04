@@ -14,7 +14,7 @@ B = 40*ones(30,1);
 C = 50*ones(17,1); 
 maxCharge = [A;B;C];
 minCharge = maxCharge/5;
-parkingTime = zeros(size(maxCharge));
+parkingTime = -1*ones(size(maxCharge));
 battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min));%lo abbiamo inizializzato con tutte le batterie assenti
 SOC = battery;
 for i = 1:size(battery,2)
@@ -44,11 +44,14 @@ for i = 1:35040
             end
         end
     end
-    if CarOut(i) ~= 0
-       [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles,SOC(:,i),maxCharge);
-       SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
+    for j = 1 : size(battery,1)
+        if parkingTime(j) == 0
+            battery(j,i) = -1;
+            VehiclesIn(i) = VehiclesIn(i) - 1;
+            parkingTime(j) = -1;
+        end
     end
-    percentCharge = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge,parkingTime,SOC(:,i));
+    [energyPartition,percentCharge] = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge,parkingTime,SOC(:,i),4);%l'ultimo argomento sono le ore di previsione
     if energy(i) < 0
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)
@@ -58,24 +61,25 @@ for i = 1:35040
             end
        end
     else
+        if VehiclesIn(i) ~= 0
            for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
                    energy2 = energy(i);
-                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),SOC(j,i),VehiclesIn(i));
+                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),energyPartition(j));
                    energy2 = energy2 -energy(i); % energia caricata sulla batteria
                    [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),energy2,SOC(j,i),maxCharge(j),percentCharge(j));
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
                 end
-           end  
+           end
+        end
            energySales15min(i) = energy(i);
     end
     VehiclesIn(i+1)=VehiclesIn(i);
     SOC(:,i+1)=SOC(:,i);
     battery(:,i+1)= battery(:,i);  
     j=1;
-    if CarIn(i) ~= 0
-        parkingTime(parkingTime ~= 0) = parkingTime(parkingTime ~= 0) - 1;
-    end
+    parkingTime(parkingTime ~= 0) = parkingTime(parkingTime ~= 0) - 1;
+    
 end
 
 energyDemandPower = (energyDemandCharge + energyDemandLoad)*4; %così abbiamo in kWh la vendita e la potenza richiesta di energia
@@ -115,8 +119,8 @@ h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
 subplot(2,3,[2,3]);
-x=21400:22400;
-plot(x,energyDemandPower(21400:22400),x,energySales(21400:22400),x,PVPower(21400:22400));
+x=600:1600;
+plot(x,energyDemandPower(600:1600),x,energySales(600:1600),x,PVPower(600:1600));
 legend({'energyDemand','energySales','PVPower'},'Location','northwest','Orientation','horizontal');
 title('EnergyDemand,EnergySales and PV')
 
@@ -130,8 +134,8 @@ title('Pareto')
 %title('EnergySales')
 
 subplot(2,3,[4,5,6]);
-x=21400:22400;
-plot(x,Load15min(21400:22400),x,battery(1,21400:22400),x,battery(31,21400:22400),x,battery(61,21400:22400));
+x=600:1600;
+plot(x,Load15min(600:1600),x,battery(:,600:1600));
 legend({'Load','24kWh','40kWh','50kWh'},'Location','northwest','Orientation','horizontal');
 title('Load and batteries')
 

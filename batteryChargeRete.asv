@@ -1,9 +1,9 @@
-function [battery,energyDemand] = batteryChargeRete(battery,energyDemand,batteryRemain,SOC,maxCharge,control)
+function [battery,energyDemand] = batteryChargeRete(battery,energyDemand,batteryRemain,SOC,maxCharge)
 
 if batteryRemain == -1
-    maxCharge15min = control * maxChargeForStep(maxCharge,SOC);
+    maxCharge15min = maxChargeForStep(maxCharge,SOC);
 else
-    maxCharge15min = control * batteryRemain;
+    maxCharge15min = batteryRemain;
 end
 
 

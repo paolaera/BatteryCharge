@@ -36,9 +36,6 @@ if energyTotal <= energyOrePrevisione
     control = 0;
 else
     control = (energyTotal - energyOrePrevisione)/energyTotal;
-    if energyTotal == 0
-        control = 0;
-    end
     if control > 1 
         control = 1;
     end
@@ -50,8 +47,7 @@ for j = 1 : size(maxCharge,1)
     if energyPartition(j) ~= 0
         percentCharge(j) = 1-(timeTotal - timeNeed(j))/timeTotal;
         if timeTotal == 0
-            percentCharge(j) = 0;
-        end
+            perce
     end
 end
 

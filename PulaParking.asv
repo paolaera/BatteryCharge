@@ -69,8 +69,6 @@ for i = 601:35040
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
                 end
            end
-        else
-            energySales15min(i) = energy(i);
         end
     end
     VehiclesIn(i+1)=VehiclesIn(i);

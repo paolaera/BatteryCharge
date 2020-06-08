@@ -1,9 +1,9 @@
 function [battery,energyDemand] = batteryChargeRete(battery,energyDemand,batteryRemain,SOC,maxCharge,control)
 
 if batteryRemain == -1
-    maxCharge15min = control * maxChargeForStep(maxCharge,SOC);
+    maxCharge15min = control * maxChargeForStep(maxCharge,SOC)/9;
 else
-    maxCharge15min = control * batteryRemain;
+    maxCharge15min = control * batteryRemain/9; %il /3 lo stiamo mettendo per diminuire la carica dalla rete
 end
 
 

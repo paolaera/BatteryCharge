@@ -14,6 +14,8 @@ B = 40*ones(30,1);
 C = 50*ones(17,1); 
 maxCharge = [A;B;C];
 minCharge = maxCharge/5;
+maxChargeBigBattery = 100;
+bigBattery = maxChargeBigBattery * ones(size(Load15min));
 parkingTime = -1*ones(size(maxCharge));
 battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min));%lo abbiamo inizializzato con tutte le batterie assenti
 SOC = battery;
@@ -22,8 +24,10 @@ for i = 1:size(battery,2)
 end
 
 energyDemandCharge = (zeros(size(Load15min)));% energia richiesta alla rete per caricare le batterie
+energyRequest = (zeros(size(Load15min)));%energia richiesta per caricare dalla rete o dalla big battery
 energyDemandLoad = (zeros(size(Load15min)));%energia richiesta alla rete per il load
 energySales15min = (zeros(size(Load15min)));
+energyRemain = (zeros(size(Load15min)));
 VehiclesIn = zeros(size(PV50kWPula15min));
 [B,I] = sortrows(SOC,1,'ascend'); %batteria meno carica prima riga, batteria più carica ultima riga
 I = I';
@@ -34,7 +38,7 @@ CarOut = zeros(size(PV50kWPula15min));
 DataVehicles = [maxCharge';zeros(1,length(maxCharge'))]; % ad ogni colonna corrispondono batteria in uscita, i kms 
 %percorsi e la permanenza in ricarica di ogni veicolo
 
-for i = 601:35040
+for i = 1:35040
     if CarIn(i) ~= 0
         [VehiclesIn(i),battery(:,i),DataVehicles,parkingTime] = InCar(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles,maxCharge,InCRS4(i,:),parkingTime);
         for j = 1 : size(battery,1)
@@ -51,12 +55,17 @@ for i = 601:35040
             parkingTime(j) = -1;
         end
     end
-    [control,percentCharge] = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge,parkingTime,SOC(:,i),8);%l'ultimo argomento sono le ore di previsione
+    [control,percentCharge] = previsione(energy,i,VehiclesIn(i),battery(:,i),maxCharge,parkingTime,SOC(:,i),4);%l'ultimo argomento sono le ore di previsione
     if energy(i) < 0
        energyDemandLoad(i) = - energy(i);
        for j = 1:size(battery,1)
             if battery(j,i) ~= -1
-               [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),-1,SOC(j,i),maxCharge(j),control);
+               [battery(j,i),energyRequest(i)] = batteryChargeRete(battery(j,i),energyRequest(i),-1,SOC(j,i),maxCharge(j),control);
+               bigBattery(i) = bigBattery(i) - energyRequest(i);
+               if bigBattery(i) < 0
+                  energyDemandCharge(i) = -bigBattery(i);
+                  bigBattery(i) = 0;
+               end
                SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
             end
        end
@@ -64,18 +73,33 @@ for i = 601:35040
         if VehiclesIn(i) ~= 0
            for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
-                   [battery(j,i),energySales15min(i),chargeRemain] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),percentCharge(j),energySales15min(i),SOC(j,i));
-                   [battery(j,i),energyDemandCharge(i)] = batteryChargeRete(battery(j,i),energyDemandCharge(i),chargeRemain,SOC(j,i),maxCharge(j),control);
+                   [battery(j,i),energyRemain(i),chargeRemain] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),percentCharge(j),energyRemain(i),SOC(j,i));
+                   [battery(j,i),energyRequest(i)] = batteryChargeRete(battery(j,i),energyRequest(i),chargeRemain,SOC(j,i),maxCharge(j),control);
+                   bigBattery(i) = bigBattery(i) - energyRequest(i);
+                   if bigBattery(i) < 0
+                      energyDemandCharge(i) = -bigBattery(i);
+                      bigBattery(i) = 0;
+                   end
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
+                end
+                bigBattery(i) = bigBattery(i) + energy(i);
+                if bigBattery(i) > maxChargeBigBattery
+                    energySales15min(i) = bigBattery(i) - maxChargeBigBattery;
+                    bigBattery(i) = maxChargeBigBattery;
                 end
            end
         else
-            energySales15min(i) = energy(i);
+            bigBattery(i) = bigBattery(i) + energy(i);
+            if bigBattery(i) > maxChargeBigBattery
+                energySales15min(i) = bigBattery(i) - maxChargeBigBattery;
+                bigBattery(i) = maxChargeBigBattery;
+            end
         end
     end
     VehiclesIn(i+1)=VehiclesIn(i);
     SOC(:,i+1)=SOC(:,i);
-    battery(:,i+1)= battery(:,i);  
+    battery(:,i+1)= battery(:,i);
+    bigBattery(i+1) = bigBattery(i);
     j=1;
     parkingTime(parkingTime ~= 0) = parkingTime(parkingTime ~= 0) - 1;
     
@@ -120,7 +144,7 @@ NB=string(length(I));
 subplot(2,3,[2,3]);
 x=600:1600;
 plot(x,energyDemandPower(600:1600),x,energySales(600:1600),x,PVPower(600:1600));
-legend({'energyDemand','energySales','PVPower'},'Location','northwest','Orientation','horizontal');
+legend({'energyDemand','energySales','PVPower'},'Orientation','horizontal');
 title('EnergyDemand,EnergySales and PV')
 
 subplot(2,3,1);

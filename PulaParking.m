@@ -14,7 +14,8 @@ B = 40*ones(30,1);
 C = 50*ones(17,1); 
 maxCharge = [A;B;C];
 minCharge = maxCharge/5;
-maxChargeBigBattery = 1000;
+for maxChargeBigBattery = 0:100:1500
+%maxChargeBigBattery = 300;
 bigBattery = maxChargeBigBattery * ones(size(Load15min));
 parkingTime = -1*ones(size(maxCharge));
 battery = -1*ones(size(maxCharge,1),length(PV50kWPula15min));%lo abbiamo inizializzato con tutte le batterie assenti
@@ -58,9 +59,9 @@ for i = 1:35040
             if battery(j,i) ~= -1
                [battery(j,i),energyRequest(i)] = batteryChargeRete(battery(j,i),energyRequest(i),-1,SOC(j,i),maxCharge(j),control);
                bigBattery(i) = bigBattery(i) - energyRequest(i);
-               if bigBattery(i) < 0
-                  energyDemandCharge(i) = -bigBattery(i);
-                  bigBattery(i) = 0;
+               if bigBattery(i) < maxChargeBigBattery * 0.2
+                  energyDemandCharge(i) = maxChargeBigBattery * 0.2 - bigBattery(i);
+                  bigBattery(i) = maxChargeBigBattery * 0.2;
                end
                SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
             end
@@ -72,9 +73,9 @@ for i = 1:35040
                    [battery(j,i),energyRemain(i),chargeRemain] = BatteryCharge(battery(j,i),energy(i),maxCharge(j),percentCharge(j),energyRemain(i),SOC(j,i));
                    [battery(j,i),energyRequest(i)] = batteryChargeRete(battery(j,i),energyRequest(i),chargeRemain,SOC(j,i),maxCharge(j),control);
                    bigBattery(i) = bigBattery(i) - energyRequest(i);
-                   if bigBattery(i) < 0
-                      energyDemandCharge(i) = -bigBattery(i);
-                      bigBattery(i) = 0;
+                   if bigBattery(i) < maxChargeBigBattery * 0.2
+                       energyDemandCharge(i) = maxChargeBigBattery * 0.2 - bigBattery(i);
+                       bigBattery(i) = maxChargeBigBattery * 0.2;
                    end
                    SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
                 end
@@ -92,13 +93,18 @@ for i = 1:35040
             end
         end
     end
+    if i ~= 35040
     VehiclesIn(i+1)=VehiclesIn(i);
     SOC(:,i+1)=SOC(:,i);
     battery(:,i+1)= battery(:,i);
     bigBattery(i+1) = bigBattery(i);
+    end
     j=1;
     parkingTime(parkingTime ~= 0) = parkingTime(parkingTime ~= 0) - 1;
-    
+end
+Total_Excess = sum(energySales15min);
+fprintf('maxChargeBigBattery = %d\n',maxChargeBigBattery);
+fprintf('Total_Excess =%f\n',Total_Excess);
 end
 
 energyDemandPower = (energyDemandCharge + energyDemandLoad)*4; %così abbiamo in kWh la vendita e la potenza richiesta di energia
@@ -133,6 +139,9 @@ fprintf('PVperCent =%f\n',PVperCent);
 fprintf('MaxVehicles =%d\n',MaxVehicles);
 fprintf('served_Car =%d\n',served_Car);
 
+
+
+
 %plot di tutti i risultati su due file
 h = figure;
 MC=string(maxCharge(1));
@@ -144,9 +153,8 @@ legend('energyDemand','energySales','PVPower');
 title('EnergyDemand,EnergySales and PV')
 
 subplot(2,3,1);
-plot(bigBattery);
-%plot(paretoArray);
-%title('Pareto')
+plot(paretoArray);
+title('Pareto')
 
 %subplot(2,3,3);
 %x=600:1600;

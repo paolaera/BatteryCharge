@@ -69,23 +69,23 @@ battery(1,:)=[];
     fprintf("energia richiesta alla rete = %e\n",energyDemand);
     fprintf("energia venduta = %e\n",energySales);
     subplot(2,3,1);
-    plot(Load15min,'b');
-    title('Subplot 1: Load15min')
+    plot(Load15min(1:1000),'b');
+    title('Load15min')
     
     subplot(2,3,2);
-    plot(PV15min,'g');
-    title('Subplot 2: PV15min')
+    plot(PV15min(1:1000),'g');
+    title('PV15min')
     
     subplot(2,3,3);
-    plot(battery,'r');
-    title('Subplot 3: battery')
+    plot(battery(1:1000),'r');
+    title('battery')
     
     subplot(2,3,[4,5,6]);
-    x=1:size(Load15min,1);
-    plot(x,Load15min,'b',x,PV15min,'g',x,battery,'r');
-    title('Subplot all')
+    x=(1:1000)
+    plot(x,Load15min(1:1000),'b',x,PV15min(1:1000),'g',x,battery(1:1000),'r');
+    title('all')
     
-     MC=string(maxCharge);
+    MC=string(maxCharge);
     filename = strcat('PlotTotale',MC,'kWh');
     savefig(filename)
     

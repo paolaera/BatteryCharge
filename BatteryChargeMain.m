@@ -43,7 +43,7 @@ for i = 9000:10000
         SOC(:,i+1)=SOC(:,i);
         NumBattery = VarCharge;
         while energy(i) > 0 & SOC(NumBattery,i)~=100 & j <= length(I)
-            [battery(NumBattery,i+1),energy(i)] = BatteryCharge(battery(NumBattery,i),energy(i),maxCharge(NumBattery),maxCharge15min(NumBattery),SOC(NumBattery,i));%applico la funzione scarica
+            [battery(NumBattery,i+1),energy(i)] = BatteryChargeOne(battery(NumBattery,i),energy(i),maxCharge(NumBattery),SOC(NumBattery,i));%applico la funzione scarica
             SOC(NumBattery,i+1) = SOCcontrol(battery(NumBattery,i+1),maxCharge(NumBattery));
             if j == size(maxCharge,1)    % usiamo questo per evitare che finisco su I(size(battery)+1)
                 NumBattery = I(j); 
@@ -80,7 +80,7 @@ energySales = energySales15min*4;
     x=9000:10000;
     plot(x,Load15min(9000:10000,1),'b',x,PV50kWPula15min(9000:10000,1),'g',x,battery(:,9000:10000));
     title('Load, PV and batteries')
-    
+    legend({'Load','PV'},'Location','northwest','Orientation','horizontal');    
    
     filename = strcat('Plot3Apr',MC,'kWh',NB,'batteries');
     saveas(h,filename + '.jpg');

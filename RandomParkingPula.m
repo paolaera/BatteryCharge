@@ -34,7 +34,7 @@ end
 
 for i = 1:35040
     if CarIn(i) ~= 0
-        [VehiclesIn(i),battery(:,i),DataVehicles] = InRandom(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles);
+        [VehiclesIn(i),battery(:,i),DataVehicles] = InRandom(VehiclesIn(i),battery(:,i),CarIn(i),i,DataVehicles,maxCharge);
         for j = 1 : size(battery,1)
             if DataVehicles(2,j)~=0
                CarOut(DataVehicles(2,j))= CarOut(DataVehicles(2,j))+1;
@@ -43,40 +43,35 @@ for i = 1:35040
         end
     end
     if CarOut(i) ~= 0
-       [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles);
+       [VehiclesIn(i),battery(:,i),DataVehicles] = OutRandom(VehiclesIn(i),CarOut(i),battery(:,i),DataVehicles,SOC(:,i),maxCharge);
        SOC(:,i)= SOCcontrol(battery(:,i),maxCharge);
     end
-    if PV50kWPula15min(i) == 0 
+    if energy(i) < 0 %l'energia del fotovoltaico non è abbastanza
+       %if PV50kWPula15min(i) > 0
             for j = 1:size(battery,1)
                 if battery(j,i) ~= -1
-                   if SOC(j,i) < 70 && SOC(j,i) > 21 && SOC(j,i) ~= SOC(j,1)
-                      [battery(j,i),energyDemand15min(i)] = batteryChargeRete(battery(j,i),energyDemand15min(i),energy(i));
+                   if SOC(j,i) < 70
+                      [battery(j,i),energyDemand15min(i)] = batteryChargeRete(battery(j,i),energyDemand15min(i),-1,SOC(j,i),maxCharge(j),1);
                       SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
-                   end                    
+                   end
                 end
             end
-            energyDemandRete(i) = -energy(i); 
+       %end
+       energyDemand15min(i) = energyDemand15min(i) - energy(i);
     elseif PV50kWPula15min(i) > 0
-        if energy(i) > 0
-           for j = 1:size(battery,1)
-                if battery(j,i) ~= -1
-                   energy2 = energy(i);
-                   [battery(j,i),energy(i)] = BatteryCharge(battery(j,i),energy(i),maxCharge(j));
-                   SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
-                   energy2 = energy2 -energy(i); % energia caricata sulla batteria
-                   if SOC(j,i) < 70 
-                      [battery(j,i),energyDemand15min(i)] = batteryChargeRete(battery(j,i),energyDemand15min(i),energy2);
-                      SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
-                      if energyDemand15min(i) < 0
-                         energySales15min(i) = -energyDemand15min(i);
-                         energyDemand15min(i) = 0;
-                      end
-                   end   
-               end
-           end
-        else
-            energyDemandRete(i) = -energy(i);
-        end
+       for j = 1:size(battery,1)
+            if battery(j,i) ~= -1
+               energy2 = energy(i);
+               [battery(j,i),energy(i)] = BatteryChargeOne(battery(j,i),energy(i),maxCharge(j),SOC(j,i));
+               SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
+               energy2 = energy2 -energy(i); % energia caricata sulla batteria
+               if SOC(j,i) < 70
+                  [battery(j,i),energyDemand15min(i)] = batteryChargeRete(battery(j,i),energyDemand15min(i),0.5,SOC(j,i),maxCharge(j),0.5);
+                  SOC(j,i) = SOCcontrol(battery(j,i),maxCharge(j));
+               end 
+               energySales15min(i) = energy(i);
+            end   
+       end
     end
     VehiclesIn(i+1)=VehiclesIn(i);
     SOC(:,i+1)=SOC(:,i);
@@ -84,24 +79,26 @@ for i = 1:35040
     j=1;
 end
 
-energyDemand = energyDemand15min*4; %così abbiamo in kWh la vendita e la potenza richiesta di energia
+energyDemandBattery = energyDemand15min*4; %così abbiamo in kWh la vendita e la potenza richiesta di energia
 energySales = energySales15min*4;
-paretoArray = energyDemand(1:1000)';
+energyDemand = energyDemandBattery + energyDemandRete;
+paretoArray = energyDemand(9000:10000)';
 paretoArray = sortrows(paretoArray,'ascend');
 
 Total_PV = sum(PV50kWPula15min);
 Total_Load = sum(Load15min);
 Total_Excess = sum(energySales15min);
 Total_Electricity_into_Cover_Load = -sum(energy(energy<0));
-Total_Electricity_into_Charge = sum(energyDemand);
+Total_Electricity_into_Charge = sum(energyDemandBattery);
 Use_PV = Total_PV - Total_Excess;
 
 
 h = figure;
 MC=string(maxCharge(1));
 NB=string(length(I));
+x=7000:8000;
 subplot(2,2,1);
-plot(energyDemand(1:1000),'c');
+plot(x,energyDemand(7000:8000));
 title('EnergyDemand')
 
 subplot(2,2,2);
@@ -109,9 +106,10 @@ plot(paretoArray);
 title('Pareto')
 
 subplot(2,2,[3,4]);
-x=1:1000;
-plot(x,Load15min(1:1000),'b',x,PV50kWPula15min(1:1000),'g',x,battery(:,1:1000));
+plot(x,Load15min(7000:8000),'b',x,PV50kWPula15min(7000:8000),'g',x,battery(:,7000:8000));
 title('Load, PV and batteries')
+legend('Load', 'PV' , 'batteries');
+
 
 
 filename = strcat('Plot1000',MC,'kWh',NB,'vehiclesPula');

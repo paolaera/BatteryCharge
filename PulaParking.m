@@ -26,10 +26,7 @@ energyDemandLoad = (zeros(size(Load15min)));%energia richiesta alla rete per il 
 energySales15min = (zeros(size(Load15min)));
 energyRemain = (zeros(size(Load15min)));
 VehiclesIn = zeros(size(PV50kWPula15min));
-[B,I] = sortrows(SOC,1,'ascend'); %batteria meno carica prima riga, batteria più carica ultima riga
-I = I';
-VarCharge = I(1);
-j=1;
+[B,I] = sortrows(battery,'ascend');
 CarIn = InCRS4(:,1)';
 CarOut = zeros(size(PV50kWPula15min));
 DataVehicles = [maxCharge';zeros(1,length(maxCharge'))]; % ad ogni colonna corrispondono batteria in uscita, i kms 
@@ -160,7 +157,7 @@ title('Pareto')
 %x=600:1600;
 %plot(x,energySales(600:1600));
 %title('EnergySales')
-title('bigBattery');
+%title('bigBattery');
 
 subplot(2,3,[4,5,6]);
 x=1600:2600;
